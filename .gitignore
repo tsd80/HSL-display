@@ -33,4 +33,10 @@ Temporary Items
 
 node_modules
 pub/files/*
+/raija/*
+/home/*
+/bulevardi/*
+/js/bulevardi.js
+/js/raija.js
+/js/home.js
 

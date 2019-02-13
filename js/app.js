@@ -6,6 +6,7 @@ numPerStop      = numPerStop      || 20;          // Number of lines to grab per
 speedWalk       = speedWalk       || 1.4;         // Walking speed in m/s
 blinkThreshold  = blinkThreshold  || 0;           // if >0, then amount of time  in mins to blink before the arrival
 reloadTime      = reloadTime      || 30;          // Amount of seconds to reload information
+pathTo          = pathTo          || "../";
 
 const loadPage = () => {
 
@@ -28,6 +29,7 @@ const loadPage = () => {
             realtime
             realtimeState
             trip {
+              wheelchairAccessible
               gtfsId
               tripHeadsign
               routeShortName
@@ -77,10 +79,11 @@ const renderData = (inData) => {
       oneLine.delay = arrival.arrivalDelay;
       oneLine.realtime = arrival.realtime;
       oneLine.realState = arrival.realtimeState;
+      oneLine.wheelC = arrival.trip.wheelchairAccessible === 'POSSIBLE';
       oneLine.id = arrival.trip.gtfsId;
       oneLine.number = arrival.trip.routeShortName;
       oneLine.heading = arrival.trip.tripHeadsign;
-      oneLine.alert1 = arrival.trip.alerts.aletrUrl;
+      oneLine.alert1 = arrival.trip.alerts.alertUrl;
       oneLine.alert2 = arrival.trip.alerts.alertHeaderText;
       oneLine.alert3 = arrival.trip.alerts.alertDescriptionText;
       oneLine.distance = distance;
@@ -92,10 +95,6 @@ const renderData = (inData) => {
 
       if (lines.findIndex(x => x.id === oneLine.id)>=0) {break;} //same line, brake the loop
       if (oneLine.timeUntil<0) {break;} //you will not make it on time to the bus stop, break the loop (NB: real time!)
-      if (oneLine.vehicle==="RAIL") {oneLine.name = `<i class="material-icons">train</i>${oneLine.name}`;}
-      if (oneLine.vehicle==="TRAM") {oneLine.name = `<i class="material-icons">tram</i>${oneLine.name}`;}
-      if (oneLine.vehicle==="SUBWAY") {oneLine.name = `<i class="material-icons">subway</i>${oneLine.name}`;}
-      if (oneLine.platform && oneLine.vehicle!=="TRAM") {oneLine.name += ` / ${oneLine.platform}`;}
       lines.push(oneLine);
     }
   }
@@ -104,9 +103,10 @@ const renderData = (inData) => {
 };
 
 const showData = (inData) => {
+  displayLog(inData);
   const show = document.getElementById('result');
-  show.innerHTML ='<div class="row header bborder" id="header"><div class="timeTop center bborder">Aika</div><div class="number center bborder">Linja</div><div class="heading ccenter bborder">Määränpää</div><div class="stopName bborder">Pysäkki</div><div class="walking center bborder">Kävelyaika</div></div>';
-  show.innerHTML +=`<div class='timetable' id='first'><div class='row'><div class='time'>00:00</div><div class="number">99</div><div class="heading">XXX</div><div class="stopName">XXX</div><div class="walking">XXX</div></div></div>`;
+  show.innerHTML ='<div class="row header" id="header"><div class="timeTop center">Aika</div><div class="number center">Linja</div><div class="heading ccenter">Määränpää</div><div class="stopName">Pysäkki</div><div class="walking center">Kävelyaika</div></div>';
+  show.innerHTML +=`<div class='timetable hidden' id='first'><div class='row'><div class='time'>00:00</div><div class="number">99</div><div class="heading">XXX</div><div class="stopName">XXX</div><div class="walking">XXX</div></div></div>`;
   let windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
   inData.length = Math.floor(( windowHeight - document.getElementById('header').clientHeight - 7) / document.getElementById('first').clientHeight);
   show.removeChild(show.childNodes[1]);
@@ -122,6 +122,11 @@ const showData = (inData) => {
 
     let scheduleTime = row.scheduleHour+":"+row.scheduleMinute;
     let realTime = row.realHour+":"+row.realMinute;
+
+    if (row.vehicle==="RAIL") {row.name = `<img src="${pathTo}assets/train.png">${row.name}`;}
+    if (row.vehicle==="TRAM") {row.name = `<img src="${pathTo}assets/tram.png">${row.name}`;}
+    if (row.vehicle==="SUBWAY") {row.name = `<img src="${pathTo}assets/metro.png">${row.name}`;row.wheelC=true;}
+    if (row.platform && row.vehicle!=="TRAM") {row.name += ` / ${row.platform}`;}
 
     if (row.delay>60) {late=` | </span><span class="late">${realTime}</span>`;hide="hide";}
     else if (row.delay<-30) {late=` | </span><span class="early">${realTime}</span>`;hide="hide";}
@@ -145,6 +150,15 @@ const showData = (inData) => {
 
   showThat +="</div>";
   show.innerHTML += showThat;
+};
+
+const displayLog = (inData) => {
+  for(let line in inData) {
+    let x = inData[line];
+    if (x.vehicle==="SUBWAY") {
+      console.log(x.realtime, x.number, x.heading, x.name, x.timeUntil, x.realState, x.id, x.walkingTime);
+    }
+  }
 };
 
 loadPage();

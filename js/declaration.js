@@ -7,4 +7,5 @@ let
     blinkThreshold,
     reloadTime,
     platformTxt,
-    limitElement;
+    limitElement,
+    pathTo;

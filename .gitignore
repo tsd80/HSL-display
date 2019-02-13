@@ -36,7 +36,10 @@ pub/files/*
 /raija/*
 /home/*
 /bulevardi/*
+/silva/*
+/assets/psd
 /js/bulevardi.js
 /js/raija.js
 /js/home.js
+/js/silva.js
 
